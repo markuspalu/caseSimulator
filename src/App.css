@@ -8,12 +8,14 @@
     overflow: hidden;
   }
 
-  .scroller-container:before {
+  /* .scroller-container:before {
     content: "▼";
     color: red;
     position: absolute;
     left: 50%;
-    top: 7%;
+    transform: translateX(-50%);
+    top: 49px;
+    z-index: 1;
   }
 
   .scroller-container:after {
@@ -21,8 +23,10 @@
     color: red;
     position: absolute;
     left: 50%;
-    top: 11.5%;
-  }
+    transform: translateX(-50%);
+    top: 79px;
+    z-index: 1;
+  } */
 
   .scroller {
     display: flex;

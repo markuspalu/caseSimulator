@@ -1,5 +1,5 @@
 import './App.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import voidwaker from './images/voidwaker.png';
 import ghraziRapier from './images/ghraziRapier.png';
@@ -72,37 +72,10 @@ const Inventory = ({ itemList }) => {
 };
 
 
-const Case = ( {openedItem, setOpenedItem, openedColor, setOpenedColor, setItemList} ) => {
-
-  const selectItem = (color) => {
-    let chanceItem = Math.floor(Math.random() * 3); // change size dynamically to object length
-    const selectedItem = items.itemSelection[color].items[chanceItem];
-    setOpenedItem(selectedItem);
-      setOpenedColor(items.itemSelection[color]);
-    setItemList(prevList => {
-      const newList = [...prevList, selectedItem];
-      return newList;
-    });
-  }
-
-  const openCase = () => {    
-    setTimeout(() => {
-      const chance = Math.floor(Math.random() * 1000);
-      if (chance <= 2) {
-        selectItem("Gold");
-      } else if (chance > 2 && chance <= 12) {
-        selectItem("Red");
-      } else if (chance > 12 && chance <= 62) {
-        selectItem("Purple");
-      } else {
-        selectItem("Blue");
-      }
-    }, "2000");
-  }
+const Case = ( {openedItem, openedColor} ) => {
 
   return (
     <div className='flex flex-col justify-center items-center'>
-      <button onClick={openCase} className='w-24 bg-green-400 p-4'>Open</button>
       {openedItem &&
         <div className={`${openedColor} p-2`} >
           <h2>You opened:</h2>
@@ -113,22 +86,25 @@ const Case = ( {openedItem, setOpenedItem, openedColor, setOpenedColor, setItemL
   )
 }
 
-const Opening = () => {
-  const fakeList = ["item1", "item2", "item3", "item4", "item5", "item6", "item7", "item8", "item9", "item10", 
-                    "item11", "item12", "item13", "item14", "item15", "item16", "item17", "item18", "item19", "item20",
-                    "item21", "item22", "item23", "item24", "item25", "item26", "item27", "item28", "item29", "item30"];
-  const [isOpen, setIsOpen] = useState(false);
-
-
-  const openCase = () => {
+const Opening = ({ fakeList, isOpen, setIsOpen, selectItem, openCase }) => {
+  
+  const rollCase = () => {
     setIsOpen(true);
     setTimeout(() => {
       setIsOpen(false);
     }, 8000)
   }
 
+  useEffect(() => {
+    if (isOpen) {
+      openCase();
+    }
+  }, [isOpen]);
+
   return (
     <>
+    <button className='bg-green-500 my-12 p-4' onClick={rollCase}>Roll</button>
+    <button className='bg-blue-500 my-12 p-4' onClick={openCase}>No roll</button>
     <div className='scroller-container'>
       <div className={`scroller ${isOpen ? 'open' : ''}`}>
         {fakeList.map((item) => (
@@ -136,7 +112,6 @@ const Opening = () => {
         ))}
       </div>
     </div>
-    <button onClick={openCase}>Roll</button>
     </>
   );
 }
@@ -146,15 +121,68 @@ function App() {
   const [itemList, setItemList] = useState([]);
   const [openedItem, setOpenedItem] = useState("");
   const [openedColor, setOpenedColor] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [fakeList, setFakeList] = useState(["item1", "item2", "item3", "item4", "item5", "item6", "item7", "item8", "item9", "item10", 
+  "item11", "item12", "item13", "item14", "item15", "item16", "item17", "item18", "item19", "item20",
+  "item21", "item22", "item23", "item24", "item25", "item26", "item27", "item28", "item29", "item30"]);
+
+  const selectItem = (color) => {
+    let chanceItem = Math.floor(Math.random() * 3); // change size dynamically to object length
+    fillList()
+    const selectedItem = items.itemSelection[color].items[chanceItem];
+
+    setTimeout(() => {
+      setOpenedItem(selectedItem);
+      setOpenedColor(items.itemSelection[color]);
+      setItemList(prevList => {
+        const newList = [...prevList, selectedItem];
+        return newList;
+      });
+    }, 8000);
+  }
+
+  const fillList = () => {
+    let fillColor;
+    const chance = Math.floor(Math.random() * 1000);
+    if (chance <= 2) {
+      fillColor = "Gold";
+    } else if (chance > 2 && chance <= 12) {
+      fillColor = "Red";
+    } else if (chance > 12 && chance <= 62) {
+      fillColor = "Purple";
+    } else {
+      fillColor = "Blue";
+    }
+    
+    for (let i = 0; i < fakeList.length; i++) {
+      fakeList[i] = (items.itemSelection[fillColor].items[Math.floor(Math.random() * 3)]);
+    }
+
+    setFakeList(prevList => {
+      const newList = [...prevList, fakeList];
+      return newList;
+    });
+  }
+
+  const openCase = () => {
+      const chance = Math.floor(Math.random() * 1000);
+      if (chance <= 2) {
+        selectItem("Gold");
+      } else if (chance > 2 && chance <= 12) {
+        selectItem("Red");
+      } else if (chance > 12 && chance <= 62) {
+        selectItem("Purple");
+      } else {
+        selectItem("Blue");
+      }
+  }
 
 
   return (
     <div>
     <div className="flex flex-col items-center">
-      <Case openedColor={openedColor} setOpenedColor={setOpenedColor} 
-            openedItem={openedItem} setOpenedItem={setOpenedItem}
-            itemList={itemList} setItemList={setItemList} />
-      <Opening />
+      <Opening fakeList={fakeList} isOpen={isOpen} setIsOpen={setIsOpen} selectItem={selectItem} openCase={openCase} />
+      <Case openedColor={openedColor} openedItem={openedItem} />
     </div>
       <Inventory itemList={itemList}/>
     </div>
