@@ -89,27 +89,30 @@ const Case = ( {openedItem, openedColor} ) => {
 const Opening = ({ fakeList, isOpen, setIsOpen, selectItem, openCase }) => {
   
   const rollCase = () => {
+    openCase();
     setIsOpen(true);
     setTimeout(() => {
       setIsOpen(false);
     }, 8000)
   }
 
-  useEffect(() => {
-    if (isOpen) {
-      openCase();
-    }
-  }, [isOpen]);
-
   return (
     <>
     <button className='bg-green-500 my-12 p-4' onClick={rollCase}>Roll</button>
-    <button className='bg-blue-500 my-12 p-4' onClick={openCase}>No roll</button>
     <div className='scroller-container'>
       <div className={`scroller ${isOpen ? 'open' : ''}`}>
-        {fakeList.map((item) => (
-          <div className="p-2 border border-gray-400 rounded-lg" key={item}>{item}</div>
-        ))}
+        {fakeList.map((item, index) => {
+          // const [color] = Object.entries(items.itemSelection).find(([color, { items }]) => items.includes(item));
+          const color = "Blue";
+          const colorClass = items.itemSelection[color].color;
+          const imageSrc = items.srcSelection[item];
+          return (
+            <div className={`${colorClass} p-2 border border-gray-400 rounded-lg flex flex-col justify-center items-center`} key={index}>
+              <p>{item}</p>
+              <img className={"w-auto h-16"} src={imageSrc} alt={`OSRS img of ${imageSrc}`}></img>
+            </div>
+          );
+        })}
       </div>
     </div>
     </>
@@ -128,8 +131,8 @@ function App() {
 
   const selectItem = (color) => {
     let chanceItem = Math.floor(Math.random() * 3); // change size dynamically to object length
-    fillList()
-    const selectedItem = items.itemSelection[color].items[chanceItem];
+    const selectedItem = items.itemSelection[color].items[chanceItem]; // we get selected item
+    fillList() // we fill the list
 
     setTimeout(() => {
       setOpenedItem(selectedItem);
