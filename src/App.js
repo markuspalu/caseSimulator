@@ -1,5 +1,5 @@
 import './App.css';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 import voidwaker from './images/voidwaker.png';
 import ghraziRapier from './images/ghraziRapier.png';
@@ -50,149 +50,109 @@ const items = {
   }
 }
 
-const Inventory = ({ itemList }) => {
+const Opening = ({ setRollingList }) => {
+  
+  // this has to be independent because we might need 1 roll or 30 rolls
+  const rollItem = async () => { // we get Item
+    const odds = await calculateOdds(); // get odds (number 1-1000)
+    const color = await chooseColor(odds); // get color based on odds
+    const selectedItem = await chooseColorItem(color); // choose item
+    return selectedItem;
+  }
+
+  // we don't even need to populate 30 indexes and replace a certain one,
+  // just populate all list once and select one is all we need,
+  // just select the winning item to be the index it stops on.
+
+  const populateList = async () => {
+    let rollList = []; // create list
+    for (let i = 0; i < 30; i++) {
+      const rolledItem = await rollItem();
+      rollList.push(rolledItem); // fill list with 30 random items
+    }
+    setRollingList(rollList);
+    return rollList;
+  }
+
+    // create list
+    // populate list with fake items
+    // add won item to right index
+
+
+    // Fill contents with items (opened item to index)
+    // Start animation (with delay if needed)
+    // After animation fill inventory
+  // }
+  
+  const calculateOdds = () => {
+    const chance = Math.floor(Math.random() * 1000); // get number between 1 and 1000
+    return chance;
+  }
+
+  const chooseColor = (odds) => {
+    let color = "";
+    if (odds <= 2) {
+      color = "Gold";
+    } else if (odds > 2 && odds <= 12) {
+      color = "Red";
+    } else if (odds > 12 && odds <= 62) {
+      color = "Purple";
+    } else {
+      color = "Blue";
+    }
+    return color;
+  }
+
+  const chooseColorItem = (color) => {
+    const chanceItem = Math.floor(Math.random() * 3); // random number 1-3
+    const selectedItem = items.itemSelection[color].items[chanceItem]; // get item based on color and random number
+    return selectedItem;
+  }
+
+  // const populateList = () => {
+  //   const createList = [];
+
+  // }
+
   return (
-    <div className='my-12 px-24'>
-      <h2 className='font-bold'>Inventory:</h2>
-      <div className='flex gap-4 flex-wrap'>
-        {itemList.map((item, index) => {
-          const [color] = Object.entries(items.itemSelection).find(([color, { items }]) => items.includes(item));
-          const colorClass = items.itemSelection[color].color;
-          const imageSrc = items.srcSelection[item];
-          return (
-            <div className={`${colorClass} p-2 border border-gray-400 rounded-lg flex flex-col justify-center items-center`} key={index}>
-              <p>{item}</p>
-              <img className={"w-auto h-16"} src={imageSrc} alt={`OSRS img of ${imageSrc}`}></img>
-            </div>
-          );
-        })}
+    <div>
+      <button className='bg-green-500 my-12 p-4' onClick={populateList}>Roll</button>
+      <div>
+        Scrolling container
       </div>
-    </div>
-  );
-};
-
-
-const Case = ( {openedItem, openedColor} ) => {
-
-  return (
-    <div className='flex flex-col justify-center items-center'>
-      {openedItem &&
-        <div className={`${openedColor} p-2`} >
-          <h2>You opened:</h2>
-          <b>{openedItem}</b>
-        </div>
-      }
     </div>
   )
 }
 
-const Opening = ({ fakeList, isOpen, setIsOpen, selectItem, openCase }) => {
-  
-  const rollCase = () => {
-    openCase();
-    setIsOpen(true);
-    setTimeout(() => {
-      setIsOpen(false);
-    }, 8000)
-  }
-
+const Case = ({ rollingList }) => {
   return (
-    <>
-    <button className='bg-green-500 my-12 p-4' onClick={rollCase}>Roll</button>
-    <div className='scroller-container'>
-      <div className={`scroller ${isOpen ? 'open' : ''}`}>
-        {fakeList.map((item, index) => {
-          // const [color] = Object.entries(items.itemSelection).find(([color, { items }]) => items.includes(item));
-          const color = "Blue";
-          const colorClass = items.itemSelection[color].color;
-          const imageSrc = items.srcSelection[item];
-          return (
-            <div className={`${colorClass} p-2 border border-gray-400 rounded-lg flex flex-col justify-center items-center`} key={index}>
-              <p>{item}</p>
-              <img className={"w-auto h-16"} src={imageSrc} alt={`OSRS img of ${imageSrc}`}></img>
-            </div>
-          );
-        })}
-      </div>
+    <div>
+      <h1>{rollingList}</h1>
     </div>
-    </>
-  );
+  )
+}
+
+const Inventory = () => {
+  return (
+    <div>
+      Inventory
+    </div>
+  )
 }
 
 function App() {
-
-  const [itemList, setItemList] = useState([]);
-  const [openedItem, setOpenedItem] = useState("");
-  const [openedColor, setOpenedColor] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
-  const [fakeList, setFakeList] = useState(["item1", "item2", "item3", "item4", "item5", "item6", "item7", "item8", "item9", "item10", 
-  "item11", "item12", "item13", "item14", "item15", "item16", "item17", "item18", "item19", "item20",
-  "item21", "item22", "item23", "item24", "item25", "item26", "item27", "item28", "item29", "item30"]);
-
-  const selectItem = (color) => {
-    let chanceItem = Math.floor(Math.random() * 3); // change size dynamically to object length
-    const selectedItem = items.itemSelection[color].items[chanceItem]; // we get selected item
-    fillList() // we fill the list
-
-    setTimeout(() => {
-      setOpenedItem(selectedItem);
-      setOpenedColor(items.itemSelection[color]);
-      setItemList(prevList => {
-        const newList = [...prevList, selectedItem];
-        return newList;
-      });
-    }, 8000);
-  }
-
-  const fillList = () => {
-    let fillColor;
-    const chance = Math.floor(Math.random() * 1000);
-    if (chance <= 2) {
-      fillColor = "Gold";
-    } else if (chance > 2 && chance <= 12) {
-      fillColor = "Red";
-    } else if (chance > 12 && chance <= 62) {
-      fillColor = "Purple";
-    } else {
-      fillColor = "Blue";
-    }
-    
-    for (let i = 0; i < fakeList.length; i++) {
-      fakeList[i] = (items.itemSelection[fillColor].items[Math.floor(Math.random() * 3)]);
-    }
-
-    setFakeList(prevList => {
-      const newList = [...prevList, fakeList];
-      return newList;
-    });
-  }
-
-  const openCase = () => {
-      const chance = Math.floor(Math.random() * 1000);
-      if (chance <= 2) {
-        selectItem("Gold");
-      } else if (chance > 2 && chance <= 12) {
-        selectItem("Red");
-      } else if (chance > 12 && chance <= 62) {
-        selectItem("Purple");
-      } else {
-        selectItem("Blue");
-      }
-  }
-
-
+ 
+  const [rollingList, setRollingList] = useState([])
+ 
   return (
     <div>
-    <div className="flex flex-col items-center">
-      <Opening fakeList={fakeList} isOpen={isOpen} setIsOpen={setIsOpen} selectItem={selectItem} openCase={openCase} />
-      <Case openedColor={openedColor} openedItem={openedItem} />
+      <div className="flex flex-col items-center">
+        <Opening setRollingList={setRollingList} />
+        <Case rollingList={rollingList} />
+      </div>
+      <Inventory />
     </div>
-      <Inventory itemList={itemList}/>
-    </div>
-  );
+  )
 }
-
-
-
 
 export default App;
